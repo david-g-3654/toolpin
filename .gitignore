@@ -3,3 +3,6 @@ dist/
 *.tsbuildinfo
 .DS_Store
 disclosure/
+
+# Embargoed benchmark entries (private disclosure in flight)
+scripts/benchmark.embargo.json

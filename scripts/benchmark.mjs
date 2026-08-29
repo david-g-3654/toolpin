@@ -16,7 +16,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdtemp, rm, readdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,16 +28,28 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 /**
  * Packages under an active, unresolved private security disclosure.
  *
- * The corpus below stays real -- the tool scans the actual published package --
- * but public output (the default) anonymises these rows and collapses their
- * findings to a bare count, so the benchmark never becomes the disclosure
- * vehicle for a vendor that has not yet had a chance to respond. Run with
- * `--full` locally to see the real names and rules. Remove an entry once the
- * fix ships and the advisory is public.
+ * These are NOT named in this (public) source: naming a package here as
+ * carrying an undisclosed finding is itself a disclosure. Instead they live in
+ * `scripts/benchmark.embargo.json`, which is gitignored. When that file is
+ * present (i.e. on the maintainer's machine) the entries are merged into the
+ * corpus, the real package is scanned, and its row is anonymised in the default
+ * output -- so `npm run benchmark` reproduces the published table locally. On a
+ * fresh public clone the file is absent, the map is empty, and no embargoed
+ * vendor is referenced anywhere. Once a fix ships and the advisory is public,
+ * move the entry into CORPUS/EMBARGOED below and delete it from the json file.
  */
-export const EMBARGOED = new Map([
-  ['@sentry/mcp-server', 'a widely-used vendor SDK (finding disclosed privately)'],
-]);
+function loadEmbargoed() {
+  const file = join(root, 'scripts', 'benchmark.embargo.json');
+  if (!existsSync(file)) return new Map();
+  try {
+    const parsed = JSON.parse(readFileSync(file, 'utf-8'));
+    return new Map(parsed.embargoed ?? []);
+  } catch {
+    return new Map();
+  }
+}
+
+export const EMBARGOED = loadEmbargoed();
 
 export const CORPUS = [
   '@modelcontextprotocol/server-filesystem',
@@ -47,13 +59,13 @@ export const CORPUS = [
   '@playwright/mcp',
   '@upstash/context7-mcp',
   '@notionhq/notion-mcp-server',
-  '@sentry/mcp-server',
   'firecrawl-mcp',
   'exa-mcp-server',
   'tavily-mcp',
   'mcp-server-kubernetes',
   'figma-developer-mcp',
   'mcp-remote',
+  ...EMBARGOED.keys(),
 ];
 
 async function fetchPackage(spec, into) {
