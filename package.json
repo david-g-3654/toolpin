@@ -1,6 +1,6 @@
 {
   "name": "toolpin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Offline-first security scanner for MCP servers and agent skills. Pin the tool surface, catch the rug pull.",
   "type": "module",
   "bin": {
