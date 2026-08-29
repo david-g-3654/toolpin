@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "name": "toolpin community trust registry (seed)",
+  "updatedAt": "2026-01-01T00:00:00Z",
+  "notes": [
+    "Entries are community-contributed attestations about specific MCP servers.",
+    "This seed ships empty on purpose: an unverified allow/deny list is worse than none.",
+    "Add your own with `toolpin trust --add`, or point at a shared file with --registry.",
+    "Indicators below are heuristics about launch configuration, not claims about any package."
+  ],
+  "entries": [],
+  "indicators": [
+    {
+      "id": "IND-RAW-FETCH",
+      "pattern": "raw\\.githubusercontent\\.com|gist\\.github(?:usercontent)?\\.com",
+      "status": "caution",
+      "reason": "Server is launched from a raw file URL, which the publisher can change at any time without a release."
+    },
+    {
+      "id": "IND-SHORTENER",
+      "pattern": "\\b(?:bit\\.ly|tinyurl\\.com|t\\.co|is\\.gd|goo\\.gl|shorturl\\.at)\\b",
+      "status": "caution",
+      "reason": "Launch configuration hides its real destination behind a URL shortener."
+    },
+    {
+      "id": "IND-BASE64-LAUNCH",
+      "pattern": "(?:^|\\s)(?:-e|--eval|-c|-Command|-EncodedCommand)\\s+[\"']?.{0,120}?(?:atob\\s*\\(|base64\\s+(?:-d|--decode)|Buffer\\.from\\([^)]*['\"]base64|fromCharCode|eval\\s*\\(|exec\\s*\\()",
+      "status": "malicious",
+      "reason": "Launch command decodes or evaluates an inline payload; a server's entry point has no reason to be obfuscated."
+    }
+  ]
+}

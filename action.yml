@@ -1,0 +1,167 @@
+name: 'toolpin'
+description: 'Scan MCP servers, client configs, and agent skills for tool poisoning, prompt injection, and credential exposure. Publishes SARIF to code scanning.'
+author: 'toolpin'
+branding:
+  icon: 'shield'
+  color: 'purple'
+
+inputs:
+  path:
+    description: 'Path(s) to scan, space-separated.'
+    required: false
+    default: '.'
+  fail-on:
+    description: 'Fail the job at or above this severity: critical, high, medium, low, info. Use "never" to report without failing.'
+    required: false
+    default: 'high'
+  severity:
+    description: 'Minimum severity to report.'
+    required: false
+    default: 'low'
+  ignore:
+    description: 'Comma-separated rule ids, id prefixes, or categories to skip.'
+    required: false
+    default: ''
+  exclude:
+    description: 'Comma-separated gitignore-style paths to skip. A .toolpinignore file in the repo is read as well.'
+    required: false
+    default: ''
+  client-configs:
+    description: 'Also scan MCP client configs found on the runner. Rarely useful in CI.'
+    required: false
+    default: 'false'
+  upload-sarif:
+    description: 'Upload results to GitHub code scanning. Requires the security-events: write permission.'
+    required: false
+    default: 'true'
+  sarif-file:
+    description: 'Where to write the SARIF report.'
+    required: false
+    default: 'toolpin.sarif'
+  job-summary:
+    description: 'Write a findings table to the job summary.'
+    required: false
+    default: 'true'
+  version:
+    description: 'Version of toolpin to run.'
+    required: false
+    default: 'latest'
+
+outputs:
+  grade:
+    description: 'Letter grade for the scan (A-F).'
+    value: ${{ steps.scan.outputs.grade }}
+  findings:
+    description: 'Total number of findings reported.'
+    value: ${{ steps.scan.outputs.findings }}
+  critical:
+    description: 'Number of critical findings.'
+    value: ${{ steps.scan.outputs.critical }}
+  high:
+    description: 'Number of high findings.'
+    value: ${{ steps.scan.outputs.high }}
+  sarif-file:
+    description: 'Path to the SARIF report.'
+    value: ${{ inputs.sarif-file }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run toolpin
+      id: scan
+      shell: bash
+      env:
+        TOOLPIN_PATH: ${{ inputs.path }}
+        TOOLPIN_FAIL_ON: ${{ inputs.fail-on }}
+        TOOLPIN_SEVERITY: ${{ inputs.severity }}
+        TOOLPIN_IGNORE: ${{ inputs.ignore }}
+        TOOLPIN_EXCLUDE: ${{ inputs.exclude }}
+        TOOLPIN_CLIENT_CONFIGS: ${{ inputs.client-configs }}
+        TOOLPIN_SARIF: ${{ inputs.sarif-file }}
+        TOOLPIN_SUMMARY: ${{ inputs.job-summary }}
+        TOOLPIN_VERSION: ${{ inputs.version }}
+      run: |
+        set -uo pipefail
+
+        # Resolve the CLI. Inside this repository, use the local build so the
+        # action always tests the code in the PR rather than the last release.
+        if [ -f "${GITHUB_ACTION_PATH}/dist/cli.js" ]; then
+          MCPA=(node "${GITHUB_ACTION_PATH}/dist/cli.js")
+        else
+          MCPA=(npx --yes "toolpin@${TOOLPIN_VERSION}")
+        fi
+
+        ARGS=(scan)
+        # shellcheck disable=SC2206
+        ARGS+=(${TOOLPIN_PATH})
+        ARGS+=(--severity "${TOOLPIN_SEVERITY}")
+        [ -n "${TOOLPIN_IGNORE}" ] && ARGS+=(--ignore "${TOOLPIN_IGNORE}")
+        [ -n "${TOOLPIN_EXCLUDE}" ] && ARGS+=(--exclude "${TOOLPIN_EXCLUDE}")
+        [ "${TOOLPIN_CLIENT_CONFIGS}" = "true" ] && ARGS+=(--client-configs)
+
+        # SARIF for code scanning. --fail-on never here: the gate is applied once,
+        # at the end, so a failing scan still produces an uploadable report.
+        "${MCPA[@]}" "${ARGS[@]}" --format sarif --output "${TOOLPIN_SARIF}" --fail-on critical >/dev/null 2>&1 || true
+
+        # JSON for the outputs and the gate.
+        "${MCPA[@]}" "${ARGS[@]}" --format json > toolpin.json 2>/dev/null || true
+
+        if [ ! -s toolpin.json ]; then
+          echo "::error::toolpin produced no report. Check the path input: ${TOOLPIN_PATH}"
+          exit 1
+        fi
+
+        node -e '
+          const r = JSON.parse(require("fs").readFileSync("toolpin.json", "utf8"));
+          const s = r.stats.bySeverity;
+          const out = require("fs").createWriteStream(process.env.GITHUB_OUTPUT, { flags: "a" });
+          out.write(`grade=${r.grade}\n`);
+          out.write(`findings=${r.findings.length}\n`);
+          for (const k of ["critical", "high", "medium", "low", "info"]) out.write(`${k}=${s[k]}\n`);
+          out.end();
+        '
+
+        if [ "${TOOLPIN_SUMMARY}" = "true" ]; then
+          "${MCPA[@]}" "${ARGS[@]}" --format markdown --fail-on critical >> "${GITHUB_STEP_SUMMARY}" 2>/dev/null || true
+        fi
+
+        # Annotate the diff even when SARIF upload is not available (forks).
+        node -e '
+          const r = JSON.parse(require("fs").readFileSync("toolpin.json", "utf8"));
+          const path = require("path");
+          const level = { critical: "error", high: "error", medium: "warning", low: "notice", info: "notice" };
+          for (const f of r.findings.slice(0, 50)) {
+            const file = path.relative(process.cwd(), f.location.file);
+            const msg = `${f.message} [${f.ruleId}, confidence ${f.confidence}]`.replace(/\n/g, " ");
+            console.log(`::${level[f.severity]} file=${file},line=${f.location.line},title=toolpin::${msg}`);
+          }
+        '
+
+        # Apply the gate.
+        if [ "${TOOLPIN_FAIL_ON}" = "never" ]; then
+          echo "gate disabled (fail-on: never)"
+          exit 0
+        fi
+        node -e '
+          const order = { critical: 4, high: 3, medium: 2, low: 1, info: 0 };
+          const r = JSON.parse(require("fs").readFileSync("toolpin.json", "utf8"));
+          const floor = order[process.env.TOOLPIN_FAIL_ON];
+          if (floor === undefined) {
+            console.log(`::error::invalid fail-on value: ${process.env.TOOLPIN_FAIL_ON}`);
+            process.exit(2);
+          }
+          const over = r.findings.filter((f) => order[f.severity] >= floor);
+          if (over.length) {
+            console.log(`::error::toolpin: ${over.length} finding(s) at or above ${process.env.TOOLPIN_FAIL_ON}. Grade ${r.grade}.`);
+            process.exit(1);
+          }
+          console.log(`toolpin: grade ${r.grade}, ${r.findings.length} finding(s), none at or above ${process.env.TOOLPIN_FAIL_ON}.`);
+        '
+
+    - name: Upload SARIF to code scanning
+      if: ${{ always() && inputs.upload-sarif == 'true' }}
+      uses: github/codeql-action/upload-sarif@v3
+      continue-on-error: true
+      with:
+        sarif_file: ${{ inputs.sarif-file }}
+        category: toolpin

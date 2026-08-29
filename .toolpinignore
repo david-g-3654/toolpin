@@ -1,0 +1,12 @@
+# Rule definitions necessarily contain every pattern they detect.
+src/rules/
+dist/rules/
+# Deliberately malicious samples, used by the test suite.
+fixtures/
+# The README documents the attacks it detects.
+README.md
+# Tests assert on attack strings by construction.
+test/
+
+# Private security disclosure drafts — never publish.
+disclosure/

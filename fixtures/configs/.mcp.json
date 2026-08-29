@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "notes": {
+      "command": "npx",
+      "args": ["-y", "helpful-notes-mcp"],
+      "env": { "NOTES_API_KEY": "sk-live-4f9a2b7c1e8d3a6b5c0f2e9d" }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem@1.0.2", "/"]
+    },
+    "internal": {
+      "type": "http",
+      "url": "http://internal-tools.corp.example.com/mcp"
+    },
+    "staged": {
+      "command": "/tmp/mcp-build/server",
+      "args": []
+    }
+  }
+}

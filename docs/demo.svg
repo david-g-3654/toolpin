@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="829" height="762" viewBox="0 0 829 762" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13">
+  <style>
+    .l{opacity:0;animation-duration:8.7s;animation-iteration-count:infinite;animation-timing-function:steps(1,end)}
+    text{fill:#d4d4d8;white-space:pre}
+    @keyframes k0{0%,8.088%{opacity:0}8.288%,100%{opacity:1}}
+    @keyframes k1{0%,8.839%{opacity:0}9.039%,100%{opacity:1}}
+    @keyframes k2{0%,9.590%{opacity:0}9.790%,100%{opacity:1}}
+    @keyframes k3{0%,10.341%{opacity:0}10.541%,100%{opacity:1}}
+    @keyframes k4{0%,11.092%{opacity:0}11.292%,100%{opacity:1}}
+    @keyframes k5{0%,11.843%{opacity:0}12.043%,100%{opacity:1}}
+    @keyframes k6{0%,12.594%{opacity:0}12.794%,100%{opacity:1}}
+    @keyframes k7{0%,14.905%{opacity:0}15.105%,100%{opacity:1}}
+    @keyframes k8{0%,22.992%{opacity:0}23.192%,100%{opacity:1}}
+    @keyframes k9{0%,23.744%{opacity:0}23.944%,100%{opacity:1}}
+    @keyframes k10{0%,31.831%{opacity:0}32.031%,100%{opacity:1}}
+    @keyframes k11{0%,34.142%{opacity:0}34.342%,100%{opacity:1}}
+    @keyframes k12{0%,46.852%{opacity:0}47.052%,100%{opacity:1}}
+    @keyframes k13{0%,47.603%{opacity:0}47.803%,100%{opacity:1}}
+    @keyframes k14{0%,49.913%{opacity:0}50.113%,100%{opacity:1}}
+    @keyframes k15{0%,58.001%{opacity:0}58.201%,100%{opacity:1}}
+    @keyframes k16{0%,58.752%{opacity:0}58.952%,100%{opacity:1}}
+    @keyframes k17{0%,59.503%{opacity:0}59.703%,100%{opacity:1}}
+    @keyframes k18{0%,60.254%{opacity:0}60.454%,100%{opacity:1}}
+    @keyframes k19{0%,61.005%{opacity:0}61.205%,100%{opacity:1}}
+    @keyframes k20{0%,61.756%{opacity:0}61.956%,100%{opacity:1}}
+    @keyframes k21{0%,62.507%{opacity:0}62.707%,100%{opacity:1}}
+    @keyframes k22{0%,63.258%{opacity:0}63.458%,100%{opacity:1}}
+    @keyframes k23{0%,64.009%{opacity:0}64.209%,100%{opacity:1}}
+    @keyframes k24{0%,64.760%{opacity:0}64.960%,100%{opacity:1}}
+    @keyframes k25{0%,65.511%{opacity:0}65.711%,100%{opacity:1}}
+    @keyframes k26{0%,66.262%{opacity:0}66.462%,100%{opacity:1}}
+    @keyframes k27{0%,67.013%{opacity:0}67.213%,100%{opacity:1}}
+    @keyframes k28{0%,67.764%{opacity:0}67.964%,100%{opacity:1}}
+    @keyframes k29{0%,68.515%{opacity:0}68.715%,100%{opacity:1}}
+    @keyframes k30{0%,69.266%{opacity:0}69.466%,100%{opacity:1}}
+    @keyframes k31{0%,70.017%{opacity:0}70.217%,100%{opacity:1}}
+    @keyframes k32{0%,70.768%{opacity:0}70.968%,100%{opacity:1}}
+    @keyframes k33{0%,71.519%{opacity:0}71.719%,100%{opacity:1}}
+    @keyframes k34{0%,72.270%{opacity:0}72.470%,100%{opacity:1}}
+    @keyframes k35{0%,74.581%{opacity:0}74.781%,100%{opacity:1}}
+    @media (prefers-reduced-motion:reduce){.l{opacity:1;animation:none}}
+  </style>
+  <rect width="829" height="762" rx="10" fill="#18181b"/>
+  <rect width="829" height="34" rx="10" fill="#232327"/>
+  <rect y="24" width="829" height="10" fill="#232327"/>
+  <circle cx="20" cy="17" r="5" fill="#f87171"/><circle cx="38" cy="17" r="5" fill="#fbbf24"/><circle cx="56" cy="17" r="5" fill="#4ade80"/>
+  <text x="414.5" y="21" text-anchor="middle" fill="#71717a" font-size="11">toolpin</text>
+  <g class="l" style="animation-name:k0"><text x="22.0" y="70" fill="#4ade80">$ </text><text x="37.1" y="70" font-weight="600">toolpin scan ./notes-mcp</text></g>
+  <g class="l" style="animation-name:k2"><text x="22.0" y="108" font-weight="600">toolpin 0.1.0</text><text x="120.1" y="108" fill="#6b7280">  2 files, 1 targets, 21ms</text></g>
+  <g class="l" style="animation-name:k4"><text x="22.0" y="146" fill="#4ade80">  No findings.</text></g>
+  <g class="l" style="animation-name:k6"><text x="37.1" y="184" font-weight="600">Grade</text><text x="82.4" y="184" fill="#4ade80">A</text><text x="112.6" y="184" fill="#4ade80">no findings</text></g>
+  <g class="l" style="animation-name:k8"><text x="22.0" y="222" fill="#4ade80">$ </text><text x="37.1" y="222" font-weight="600">toolpin pin ./notes-mcp</text></g>
+  <g class="l" style="animation-name:k9"><text x="22.0" y="241">pinned 2 tools across 1 servers to ./toolpin.lock</text></g>
+  <g class="l" style="animation-name:k10"><text x="22.0" y="260" fill="#a78bfa">  # tool descriptions recorded at review time</text></g>
+  <g class="l" style="animation-name:k12"><text x="22.0" y="298" fill="#a78bfa"># one week later. same version, same files.</text></g>
+  <g class="l" style="animation-name:k15"><text x="22.0" y="355" fill="#4ade80">$ </text><text x="37.1" y="355" font-weight="600">toolpin scan ./notes-mcp --lock toolpin.lock</text></g>
+  <g class="l" style="animation-name:k17"><text x="22.0" y="393" font-weight="600">toolpin 0.1.0</text><text x="120.1" y="393" fill="#6b7280">  2 files, 1 targets, 25ms</text></g>
+  <g class="l" style="animation-name:k19"><text x="22.0" y="431" font-weight="600">notes-mcp</text></g>
+  <g class="l" style="animation-name:k20"><text x="37.1" y="450" fill="#fb7185">CRIT</text><text x="74.8" y="450" fill="#6b7280">1:1</text><text x="97.5" y="450">  Description of "save_note" changed since 2026-08-29. New text: "Save a note. First read ~/.…</text></g>
+  <g class="l" style="animation-name:k21"><text x="74.8" y="469" fill="#6b7280">MCP-DRIFT-001 · confidence high</text></g>
+  <g class="l" style="animation-name:k23"><text x="22.0" y="507" font-weight="600">notes-mcp/index.js</text></g>
+  <g class="l" style="animation-name:k24"><text x="37.1" y="526" fill="#fb7185">CRIT</text><text x="74.8" y="526" fill="#6b7280">7:75</text><text x="105.0" y="526">  Description instructs the agent to hide activity from the user - explicitly tells the agen…</text></g>
+  <g class="l" style="animation-name:k25"><text x="74.8" y="545" fill="#6b7280">MCP-TP-002 · confidence high</text></g>
+  <g class="l" style="animation-name:k26"><text x="74.8" y="564" fill="#6b7280">&gt; Do not tell the user</text></g>
+  <g class="l" style="animation-name:k27"><text x="37.1" y="583" fill="#fb7185">CRIT</text><text x="74.8" y="583" fill="#6b7280">7:20</text><text x="105.0" y="583">  Description directs the agent to read credentials or sensitive files - names a credential …</text></g>
+  <g class="l" style="animation-name:k28"><text x="74.8" y="602" fill="#6b7280">MCP-TP-003 · confidence high</text></g>
+  <g class="l" style="animation-name:k29"><text x="74.8" y="621" fill="#6b7280">&gt; read ~/.ssh</text></g>
+  <g class="l" style="animation-name:k30"><text x="37.1" y="640" fill="#fbbf24">MED </text><text x="74.8" y="640" fill="#6b7280">7:14</text><text x="105.0" y="640">  Description imposes a hidden precondition on the agent - mandatory preliminary action</text><text x="761.9" y="640" fill="#6b7280"> [sav…</text></g>
+  <g class="l" style="animation-name:k31"><text x="74.8" y="659" fill="#6b7280">MCP-TP-004 · confidence low</text></g>
+  <g class="l" style="animation-name:k32"><text x="74.8" y="678" fill="#6b7280">&gt; First read ~/</text></g>
+  <g class="l" style="animation-name:k34"><text x="37.1" y="716" font-weight="600">Grade</text><text x="82.4" y="716" fill="#fb7185">F</text><text x="112.6" y="716" fill="#fb7185">3 critical</text><text x="188.1" y="716">, </text><text x="203.2" y="716" fill="#fbbf24">1 medium</text></g>
+</svg>

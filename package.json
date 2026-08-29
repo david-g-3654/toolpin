@@ -1,0 +1,61 @@
+{
+  "name": "toolpin",
+  "version": "0.1.0",
+  "description": "Offline-first security scanner for MCP servers and agent skills. Pin the tool surface, catch the rug pull.",
+  "type": "module",
+  "bin": {
+    "toolpin": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/postbuild.mjs",
+    "watch": "tsc -p tsconfig.json --watch",
+    "test": "npm run build && node --test \"test/**/*.test.js\"",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build",
+    "benchmark": "npm run build && node scripts/benchmark.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "security",
+    "scanner",
+    "sarif",
+    "prompt-injection",
+    "tool-poisoning",
+    "agent-security",
+    "ai-security",
+    "supply-chain",
+    "audit",
+    "claude",
+    "agent-skills"
+  ],
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/david-g-3654/toolpin.git"
+  },
+  "homepage": "https://github.com/david-g-3654/toolpin#readme",
+  "bugs": {
+    "url": "https://github.com/david-g-3654/toolpin/issues"
+  }
+}

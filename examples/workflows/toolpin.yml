@@ -1,0 +1,25 @@
+# Scan every push and pull request, and publish findings to the Security tab.
+#
+# Findings appear in three places:
+#   - inline annotations on the pull request diff
+#   - a findings table in the job summary
+#   - Security > Code scanning alerts, deduplicated across runs by fingerprint
+name: MCP audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write   # required to publish to the Security tab
+    steps:
+      - uses: actions/checkout@v4
+      - uses: david-g-3654/toolpin@v1
+        with:
+          path: .
+          fail-on: high

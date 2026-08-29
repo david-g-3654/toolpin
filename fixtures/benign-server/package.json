@@ -1,0 +1,8 @@
+{
+  "name": "weather-mcp",
+  "version": "2.1.0",
+  "type": "module",
+  "dependencies": {
+    "zod": "3.23.8"
+  }
+}
