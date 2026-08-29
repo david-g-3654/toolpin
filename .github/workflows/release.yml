@@ -1,0 +1,55 @@
+# Publishes toolpin to npm when a version tag is pushed.
+#
+#   npm version patch        # bumps package.json + creates the vX.Y.Z tag
+#   git push --follow-tags   # pushing the tag triggers this workflow
+#
+# Requires one repo secret: NPM_TOKEN — a granular access token with
+# read+write to packages (Settings > Secrets and variables > Actions).
+# The moving `v1` tag has no dots, so it never triggers a publish.
+name: release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # create the GitHub Release
+      id-token: write   # npm provenance (OIDC)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm ci
+
+      # Fail loudly if the tag and package.json disagree, before anything ships.
+      - name: Verify tag matches package.json version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p 'require("./package.json").version')"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::Tag v$tag does not match package.json version $pkg"
+            exit 1
+          fi
+          echo "Publishing toolpin@$pkg"
+
+      - run: npm test
+
+      # prepublishOnly rebuilds; --provenance attaches a signed build attestation.
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes --title "$GITHUB_REF_NAME"
+        env:
+          GH_TOKEN: ${{ github.token }}
