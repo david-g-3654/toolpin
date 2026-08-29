@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/david-g-3654/toolpin/main/docs/demo.svg" alt="toolpin scanning a server, pinning its tools, then catching a rewritten tool description a week later" width="829">
+  <img src="docs/demo.svg" alt="toolpin scanning a server, pinning its tools, then catching a rewritten tool description a week later" width="829">
 </p>
 
 ---
