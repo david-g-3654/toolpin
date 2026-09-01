@@ -132,10 +132,11 @@ test('a server that actually binds to 0.0.0.0 is still caught', async () => {
 });
 
 test('a quoted shell interpolation is reported honestly, not as critical', async () => {
-  // A real vendor SDK opens a browser with exec(`open ${JSON.stringify(url)}`), where the
-  // URL comes from a server response. JSON-quoting is not shell-safe, so this stays reported
-  // (high/low) rather than dismissed -- but not as critical, since it is quoted. (Attribution
-  // withheld pending private disclosure; see disclosure/.)
+  // Pattern seen in the wild: a browser opener, exec(`open ${JSON.stringify(url)}`).
+  // JSON-quoting is not shell-safe ($(...) survives inside double quotes), so the sink
+  // stays reported -- but at high/low, not critical, because the quoting lowers confidence.
+  // Whether it is actually reachable depends on where `url` comes from; that is a human
+  // call, which is exactly why this is low confidence and not a critical verdict.
   const findings = await scanSource({
     'a.js': 'import { exec } from "node:child_process";\nexec(`open ${JSON.stringify(url)}`);\n',
   });
@@ -152,7 +153,7 @@ test('a quoted shell interpolation is reported honestly, not as critical', async
 });
 
 test('a published tarball is not nagged about a missing lockfile', async () => {
-  // Every one of the 14 corpus packages: published tarballs never ship lockfiles.
+  // Every one of the 13 corpus packages: published tarballs never ship lockfiles.
   const pkg = JSON.stringify({ name: 'x', version: '1.0.0', dependencies: { zod: '3.0.0' } });
   const published = await scanSource({ 'package.json': pkg, 'dist/index.js': 'export const a = 1;' });
   assert.equal(published.filter((f) => f.ruleId === 'MCP-SUP-003').length, 0);

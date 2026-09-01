@@ -176,15 +176,15 @@ A scanner nobody trusts gets `continue-on-error: true` and then gets deleted. So
 npm run benchmark
 ```
 
-It downloads 14 widely used MCP servers from npm (`npm pack` only — never installed, never executed) and scans each one.
+It downloads 13 widely used MCP servers from npm (`npm pack` only — never installed, never executed) and scans each one.
 
 | | |
 |---|---|
-| Packages | 14 |
+| Packages | 13 |
 | **Fully clean** | **7** |
-| Total findings | 14 (1.0 per package) |
+| Total findings | 10 (0.77 per package) |
 | **Critical findings** | **0** |
-| High-confidence findings | 1 |
+| High-severity findings | 1 |
 
 <details>
 <summary><strong>Per-package results</strong></summary>
@@ -193,26 +193,23 @@ It downloads 14 widely used MCP servers from npm (`npm pack` only — never inst
 PACKAGE                                          FILES TOOLS  FINDINGS
 @modelcontextprotocol/server-filesystem              7    15  clean
 @modelcontextprotocol/server-memory                  3    10  clean
-@modelcontextprotocol/server-sequential-thinking     4     2  clean
+@modelcontextprotocol/server-sequential-thinking     5     2  clean
 @modelcontextprotocol/server-everything             52     0  MCP-NET-001(m/l)
 @playwright/mcp                                      4     0  clean
 @upstash/context7-mcp                               10     3  MCP-TP-004(m/l) MCP-TP-004(m/l)
 @notionhq/notion-mcp-server                         36    27  MCP-NET-001(m/l) MCP-SUP-003(l/h) MCP-CRED-003(l/l)
-a widely-used vendor SDK*                            68     0  4 findings — withheld pending disclosure
 firecrawl-mcp                                        4    27  clean
 exa-mcp-server                                      17     0  MCP-TP-002(h/h)
 tavily-mcp                                           3     6  clean
-mcp-server-kubernetes                               44    28  MCP-NET-001(m/l) MCP-NET-001(m/l)
+mcp-server-kubernetes                               45    28  MCP-NET-001(m/l) MCP-NET-001(m/l)
 figma-developer-mcp                                 11     4  MCP-NET-001(m/l)
 mcp-remote                                           4     0  clean
 ```
 
-\* One row is anonymised. The tool flagged a genuine command-injection path in a
-widely-used vendor's MCP server (server-controlled data reaching `child_process.exec`).
-It was verified by hand and reported privately to the vendor before this benchmark was
-published; the row will be de-anonymised once a fix ships. See **Responsible disclosure** below.
-The other high-confidence finding, on exa-mcp-server, is a published skill that instructs
-the agent not to ask for confirmation — surfaced, not judged.
+The one high-severity finding, on exa-mcp-server, is a published skill that instructs
+the agent not to ask for confirmation — surfaced, not judged. The remaining findings are
+low/medium network- and supply-chain-hygiene flags left for the reader to weigh; none is
+a confirmed vulnerability. A finding is a starting point for human triage, not a verdict.
 
 </details>
 
@@ -222,24 +219,16 @@ The clean fixture is a test in its own right: a new rule that lights it up fails
 
 ## Responsible disclosure
 
-Running toolpin against real software finds real bugs. During the benchmark it
-flagged a command-injection path in a widely-used vendor's MCP server: a URL taken
-from an authorization server's HTTP response reaches `child_process.exec` through a
-shell, and a `z.string().url()` check does not stop shell metacharacters, so a
-`$(...)` sequence in that URL executes on the client. It is reachable when the
-authorization host is attacker-influenced, which the product supports as a
-configuration option.
+toolpin scans real, published packages, so it will sometimes surface something real
+in software you don't own. Two rules of the road:
 
-That finding was **verified by hand and reported privately to the vendor before
-this benchmark was published.** The benchmark anonymises the row and withholds the
-rule detail until a fix ships — a security tool should not launch by dropping an
-unreported finding on a named vendor. The aggregate numbers above are unchanged and
-honest; only that one row's specifics are held back.
-
-If you run `npm run benchmark` yourself you are scanning the real, published
-packages and will see everything toolpin sees — the embargo applies only to what
-*this project* publishes, not to what the tool reports to you. If you find something
-in someone else's server, disclose it to them before you post it.
+- **A finding is a lead, not a verdict.** The scanner flags a pattern — a sink, a
+  suspicious string, a network call. Whether it's actually exploitable depends on the
+  data flow around it, and that's a human call. Trace where the input comes from and
+  whether an attacker can influence it before you treat a finding as a vulnerability.
+- **If you confirm a real issue in someone else's server, tell them privately first**
+  and give them time to fix it before you post about it publicly. That's the courtesy
+  this project follows too.
 
 ## Rug pulls
 

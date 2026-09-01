@@ -16,40 +16,13 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdtemp, rm, readdir } from 'node:fs/promises';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { scan } from '../dist/index.js';
 
 const run = promisify(execFile);
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-
-/**
- * Packages under an active, unresolved private security disclosure.
- *
- * These are NOT named in this (public) source: naming a package here as
- * carrying an undisclosed finding is itself a disclosure. Instead they live in
- * `scripts/benchmark.embargo.json`, which is gitignored. When that file is
- * present (i.e. on the maintainer's machine) the entries are merged into the
- * corpus, the real package is scanned, and its row is anonymised in the default
- * output -- so `npm run benchmark` reproduces the published table locally. On a
- * fresh public clone the file is absent, the map is empty, and no embargoed
- * vendor is referenced anywhere. Once a fix ships and the advisory is public,
- * move the entry into CORPUS/EMBARGOED below and delete it from the json file.
- */
-function loadEmbargoed() {
-  const file = join(root, 'scripts', 'benchmark.embargo.json');
-  if (!existsSync(file)) return new Map();
-  try {
-    const parsed = JSON.parse(readFileSync(file, 'utf-8'));
-    return new Map(parsed.embargoed ?? []);
-  } catch {
-    return new Map();
-  }
-}
-
-export const EMBARGOED = loadEmbargoed();
 
 export const CORPUS = [
   '@modelcontextprotocol/server-filesystem',
@@ -65,7 +38,6 @@ export const CORPUS = [
   'mcp-server-kubernetes',
   'figma-developer-mcp',
   'mcp-remote',
-  ...EMBARGOED.keys(),
 ];
 
 async function fetchPackage(spec, into) {
@@ -85,7 +57,6 @@ async function fetchPackage(spec, into) {
 
 async function main() {
   const asJson = process.argv.includes('--json');
-  const full = process.argv.includes('--full');
   const workdir = await mkdtemp(join(tmpdir(), 'toolpin-bench-'));
   const rows = [];
 
@@ -97,7 +68,6 @@ async function main() {
         continue;
       }
       const result = await scan({ paths: [path] });
-      const embargo = EMBARGOED.get(spec);
       const findings = result.findings.map((f) => ({
         rule: f.ruleId,
         severity: f.severity,
@@ -105,15 +75,11 @@ async function main() {
         message: f.message,
       }));
       rows.push({
-        package: embargo && !full ? embargo : spec,
-        embargoed: Boolean(embargo),
+        package: spec,
         files: result.stats.filesScanned,
         tools: result.targets[0]?.tools?.length ?? 0,
         grade: result.grade,
-        // Collapse embargoed findings to a count so public output does not
-        // fingerprint the vulnerability before the vendor has responded.
-        findings: embargo && !full ? [] : findings,
-        findingCount: findings.length,
+        findings,
       });
     }
   } finally {
@@ -121,11 +87,8 @@ async function main() {
   }
 
   const scanned = rows.filter((r) => !r.error);
-  // Aggregate counts stay honest even for embargoed rows: only the per-row
-  // rule detail is withheld, never the totals.
-  const count = (r) => r.findingCount ?? r.findings.length;
-  const total = scanned.reduce((n, r) => n + count(r), 0);
-  const clean = scanned.filter((r) => count(r) === 0).length;
+  const total = scanned.reduce((n, r) => n + r.findings.length, 0);
+  const clean = scanned.filter((r) => r.findings.length === 0).length;
   const critical = scanned.reduce((n, r) => n + r.findings.filter((f) => f.severity === 'critical').length, 0);
   const summary = {
     packages: scanned.length,
@@ -146,23 +109,15 @@ async function main() {
       process.stdout.write(`${r.package.padEnd(48)}${'-'.padStart(6)}${'-'.padStart(6)}  ${r.error}\n`);
       continue;
     }
-    const detail = r.embargoed
-      ? `${r.findingCount} finding(s) — details withheld pending disclosure`
-      : r.findings.length
-        ? r.findings.map((f) => `${f.rule}(${f.severity[0]}/${f.confidence[0]})`).join(' ')
-        : 'clean';
+    const detail = r.findings.length
+      ? r.findings.map((f) => `${f.rule}(${f.severity[0]}/${f.confidence[0]})`).join(' ')
+      : 'clean';
     process.stdout.write(`${r.package.padEnd(48)}${String(r.files).padStart(6)}${String(r.tools).padStart(6)}  ${detail}\n`);
   }
   process.stdout.write(
     `\n${summary.packages} packages · ${summary.clean} fully clean · ` +
-      `${summary.totalFindings} findings (${summary.findingsPerPackage}/package) · ${summary.critical} critical\n`,
+      `${summary.totalFindings} findings (${summary.findingsPerPackage}/package) · ${summary.critical} critical\n\n`,
   );
-  if (!full && rows.some((r) => r.embargoed)) {
-    process.stdout.write(
-      'One row is anonymised: a finding is under private disclosure to the vendor. Run with --full locally.\n',
-    );
-  }
-  process.stdout.write('\n');
 }
 
 main().catch((err) => {
